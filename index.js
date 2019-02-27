@@ -149,6 +149,8 @@ app.post('/move', (request, response) => {
       chances[i] -= difference;
     }
   }
+  
+  //edit
 
   for (let i = 0; i < 4; i++) {
     for (snake of data.board.snakes) {
