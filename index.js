@@ -62,6 +62,41 @@ app.post('/move', (request, response) => {
 
     let TestedOffsets = [[0, 0]];
 
+    //Initialize GameBoard Array
+
+    /*
+     * NULL: 0,
+     * SNAKETAIL: 1,
+     * SNAKE: 2,
+     * SNAKEHEAD: 3,
+     * FOOD: -4
+    */
+
+    let GameBoard = Array(data.board.width - 1).fill(Array(data.board.width - 1).fill(0));
+    initializeSnakes();
+
+    function initializeSnakes() {
+        for (snake of data.board.snakes) {
+            for (tile of snake.body) {
+                if (tile == snake.body[0]) {
+                    GameBoard[tile.x][tile.y] += 1;
+                }
+                if (tile == snake.body[snake.body.length - 1]) {
+                    GameBoard[tile.x][tile.y] -= 1;
+                }
+                GameBoard[tile.x][tile.y] += 2;
+            }
+        }
+    }
+
+    initializeFoods();
+
+    function initializeFoods() {
+        for (food of data.board.food) {
+            GameBoard[food.x][food.y] -= 4
+        }
+    }
+
 
     // get nearest piece of food as PrimalFood
     let MinimumDistancedFood = Infinity;
@@ -157,23 +192,6 @@ app.post('/move', (request, response) => {
                 chances[i] -= difference;
             }
         }
-
-        /*for (let i = 0; i < 4; i++) {
-            for (snake of data.board.snakes) {
-                position = [MySnakesHead.x + offsets[i][0], MySnakesHead.y + offsets[i][1]];
-
-                //test for next move head of other snake
-                for (let offset of offsets) {
-                    if (snake.body[0].x == position[0] + offset[0] && snake.body[0].y == position[1] + offset[1] && snake.id != data.you.id && chances[i] > 0) {
-                        if (snake.body.length >= MyLength) {
-                            chances[i] -= 30;
-                        } else {
-                            chances[i] += 30;
-                        }
-                    }
-                }
-            }
-        }*/
     }
     
 
@@ -303,24 +321,9 @@ app.post('/move', (request, response) => {
             FLAG = true;
         }
 
-        //test for own snake
-        for (let bodypart of data.you.body) {
-            if (bodypart != data.you.body[data.you.body.length - 1]) {
-                if (position.x == bodypart.x && position.y == bodypart.y) {
-                    FLAG = true;
-                }
-            }
-        }
-
-        //test for other snake
-        for (let snake of data.board.snakes) {
-            for (let bodypart of snake.body) {
-                if (bodypart != snake.body[snake.body.length - 1]) {
-                    if (position.x == bodypart.x && position.y == bodypart.y) {
-                        FLAG = true;
-                    }
-                } 
-            }
+        //test for snake
+        if (GameBoard[position.x][position.y] != 0 && GameBoard[position.x][position.y] > -3) {
+            FLAG = true;
         }
 
         return FLAG;
