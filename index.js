@@ -89,7 +89,10 @@ app.post('/move', (request, response) => {
     }
 
 
-    // get nearest piece of food as PrimalFood
+    /*
+     * get nearest piece of food as PrimalFood
+    */
+
     let MinimumDistancedFood = Infinity;
     for (let food of data.board.food) {
         let distance = Math.abs(food.x - MySnakesHead.x) + Math.abs(food.y - MySnakesHead.y);
@@ -99,23 +102,39 @@ app.post('/move', (request, response) => {
         }
     }
 
-    // calculate remaining space as RemainingArea
+    /*
+     * calculate remaining space as RemainingArea
+    */
+
     let BoardArea = data.board.height * data.board.width;
     let RemainingArea = BoardArea;
     for (let snake of data.board.snakes) {
         RemainingArea -= snake.body.length;
     }
 
-    // test offsets if possible to play
+    /*
+     * test offsets if possible to play
+    */
+
     for (let o = 0; o < 4; o++) {
         if (ObstacleOnPosition(offsets[o])) {
             chances[o] = 0;
         }
     }
 
-    // get nearest snake and its length
+    /*
+     * get snakes and its lengths and configure chances on next movement if distance == 2
+    */
+
     let snakes = [];
     for (snake of data.board.snakes) {
+
+        /*
+         * TODO:
+         * edit chance changes
+         * code design
+        */
+
         let DistanceToMySnakeHead = Math.abs(snake.x - MySnakesHead.x) + Math.abs(snake.y - MySnakesHead.y);
         let SnakeLength = snake.body.length;
         snakes.push({x: snake.x, y: snake.y, distance: DistanceToMySnakeHead, length: SnakeLength});
@@ -138,32 +157,20 @@ app.post('/move', (request, response) => {
         } 
     }
 
-    // influence of food
-    FoodInfluences();
+    /* 
+     * influence of bordering fields
+    */
 
-    function FoodInfluences() {
-        let OffsetToPrimalFood = [PrimalFood.x - MySnakesHead.x, PrimalFood.y - MySnakesHead.y];
-        if (data.you.health <= 40) {
-            ChanceChange = 25;
-        } else {
-            ChanceChange = 0;
-        }
-        if (OffsetToPrimalFood[0] < 0 && chances[0] > 0) {
-            chances[0] += ChanceChange;
-        } else if (OffsetToPrimalFood[0] > 0 && chances[1] > 0) {
-            chances[1] += ChanceChange;
-        }
-        if (OffsetToPrimalFood[1] < 0 && chances[2] > 0) {
-            chances[2] += ChanceChange;
-        } else if (OffsetToPrimalFood[1] > 0 && chances[3] > 0) {
-            chances[3] += ChanceChange;
-        }
-    }
-    
-    // influence of next moving possibilities
     NextMoveInfluences();
 
     function NextMoveInfluences() {
+
+        /*
+         * TODO:
+         * edit TunnelHasExit() function
+         * change chances increasement
+        */
+
         for (let i = 0; i < 4; i++) {
             difference = 0;
             for (let offset of offsets) {
@@ -185,9 +192,10 @@ app.post('/move', (request, response) => {
         }
     }
     
+    /*
+     * Test for close room < 10 on neighbour fields
+    */
 
-    // Test for close room < 10 on neighbour fields
-    // just for left direction now
     for (let d = 0; d < 4; d++) {
         let StartField = MySnakesHead;
 
@@ -195,36 +203,6 @@ app.post('/move', (request, response) => {
         let FreeFields = [];
         let i = 0;
         getAllFreeFields(LeftField);
-
-        function getAllFreeFields(field) {
-
-            let FreeDirections = [];
-
-            for (let direction = 0; direction < 4, direction++) {
-
-                let TestThisField = getNeighbourField(field, direction);
-                if (!ObstacleOnPosition(TestThisField)) {
-                    if (!ElementInArray(TestThisField, FreeFields)) {
-                        i++;
-                        FreeFields.push(TestThisField);
-                        FreeDirections.push(direction);
-                    }
-                }
-            }
-
-            if (i <= 10) {
-                for (let direction of FreeDirections) {
-                    getAllFreeFields(getNeighbourField(field, direction));
-                }
-            }
-
-        }
-
-        function getNeighbourField(StartField, direction) {
-            // direction : {left: 0, right: 1, up: 2, down: 3}
-            let NeighbourField = [offsets[direction][0] + StartField.x, offsets[direction][1] + StartField.y];
-            return NeighbourField;
-        }
 
         console.log(FreeFields.length);
 
@@ -238,10 +216,78 @@ app.post('/move', (request, response) => {
             //change chance for direction proportinal to chance for exit
         }
     }
-    
-    
 
-    //Return Move
+    function getAllFreeFields(field) {
+
+        /*
+         * TODO:
+         * test if working
+        */
+
+        let FreeDirections = [];
+
+        for (let direction = 0; direction < 4, direction++) {
+
+            let TestThisField = getNeighbourField(field, direction);
+            if (!ObstacleOnPosition(TestThisField)) {
+                if (!ElementInArray(TestThisField, FreeFields)) {
+                    i++;
+                    FreeFields.push(TestThisField);
+                    FreeDirections.push(direction);
+                }
+            }
+        }
+
+        if (i <= 10) {
+            for (let direction of FreeDirections) {
+                getAllFreeFields(getNeighbourField(field, direction));
+            }
+        }
+
+    }
+
+    function getNeighbourField(StartField, direction) {
+        // direction : {left: 0, right: 1, up: 2, down: 3}
+        let NeighbourField = [offsets[direction][0] + StartField.x, offsets[direction][1] + StartField.y];
+        return NeighbourField;
+    }
+
+    /*
+     * influence of food
+    */
+
+    FoodInfluences();
+
+    function FoodInfluences() {
+
+        /*
+         * TODO:
+         * if equal chances on different directions, then prefer food direction
+         * if health decreased , then (proportional chance) turn to food direction
+        */ 
+
+        let OffsetToPrimalFood = [PrimalFood.x - MySnakesHead.x, PrimalFood.y - MySnakesHead.y];
+        if (data.you.health <= 40) {
+            ChanceChange = 25;
+        } else {
+            ChanceChange = 0;
+        }
+        if (OffsetToPrimalFood[0] < 0 && chances[0] > 0) {
+            chances[0] += ChanceChange;
+        } else if (OffsetToPrimalFood[0] > 0 && chances[1] > 0) {
+            chances[1] += ChanceChange;
+        }
+        if (OffsetToPrimalFood[1] < 0 && chances[2] > 0) {
+            chances[2] += ChanceChange;
+        } else if (OffsetToPrimalFood[1] > 0 && chances[3] > 0) {
+            chances[3] += ChanceChange;
+        }
+    }
+    
+    /*
+     * return move
+    */
+
     let max = -Infinity;
     let nextMove = 'left';
     for (let i = 0; i < 4; i++) {
@@ -251,46 +297,52 @@ app.post('/move', (request, response) => {
         }
     }
 
-    // logs
-    console.log(data.turn);
-    /*for (let i = 0; i < 4; i++) {
-    console.log(chances[i]);
-    }*/
+    /*
+     * logs
+    */
 
-    // Response data
+    console.log(data.turn);
+    for (let i = 0; i < 4; i++) {
+        console.log(chances[i]);
+    }
+
+    /*
+     * Response data
+    */
+    
     const ResponseData = {
         move: nextMove, // one of: ['up','down','left','right']
     }
 
     return response.json(ResponseData);
 
-  /*function TunnelHasExit (StartOffset) {
     //teste von StartOffset alle Nachbarfelder ob frei
     //ignoriere bereits getestete Felder
-    let FreeOffset;
-    let CountFreeOffsets = 0;
 
-    for (offset of offsets) {
-      let OffOffset = [StartOffset[0] + offset[0], StartOffset[1] + offset[1]];
-
-      if (!ElementInArray(OffOffset, TestedOffsets)) {
-        TestedOffsets[TestedOffsets.length] = OffOffset;
-        if (!ObstacleOnPosition(OffOffset)) {
-          CountFreeOffsets += 1;
-          FreeOffset = OffOffset;
-        }
-      }
-    }
-    if (CountFreeOffsets == 1) {
-      return TunnelHasExit(FreeOffset);
-    } else if (CountFreeOffsets == 0) {
-      return false;
-    } else {
-      return true;
-    }
-
+    /*function TunnelHasExit (StartOffset) {
     
-  }*/
+        let FreeOffset;
+        let CountFreeOffsets = 0;
+
+        for (offset of offsets) {
+            let OffOffset = [StartOffset[0] + offset[0], StartOffset[1] + offset[1]];
+
+            if (!ElementInArray(OffOffset, TestedOffsets)) {
+                TestedOffsets[TestedOffsets.length] = OffOffset;
+                if (!ObstacleOnPosition(OffOffset)) {
+                    CountFreeOffsets += 1;
+                    FreeOffset = OffOffset;
+                }
+            }
+        }
+        if (CountFreeOffsets == 1) {
+            return TunnelHasExit(FreeOffset);
+        } else if (CountFreeOffsets == 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }*/
 
     function ElementInArray(elem, arr) {
         let FLAG = false;
