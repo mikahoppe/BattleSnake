@@ -35,15 +35,6 @@ app.post('/start', (request, response) => {
   return response.json(data)
 })
 
-
-
-
-
-
-
-
-
-
 // Handle POST request to '/move'
 app.post('/move', (request, response) => {
 
@@ -116,9 +107,9 @@ app.post('/move', (request, response) => {
     }
 
     // test offsets if possible to play
-    for (let i = 0; i < 4; i++) {
-        if (ObstacleOnPosition(offsets[i])) {
-            chances[i] = 0;
+    for (let o = 0; o < 4; o++) {
+        if (ObstacleOnPosition(offsets[o])) {
+            chances[o] = 0;
         }
     }
 
@@ -197,53 +188,57 @@ app.post('/move', (request, response) => {
 
     // Test for close room < 10 on neighbour fields
     // just for left direction now
-    let direction = 1;
-    let StartField = MySnakesHead;
+    for (let d = 0; d < 4; d++) {
+        let StartField = MySnakesHead;
 
-    let LeftField = getNeighbourField(StartField, 0);
-    let FreeFields = [];
-    let i = 0;
-    getAllFreeFields(LeftField);
+        let LeftField = getNeighbourField(StartField, d);
+        let FreeFields = [];
+        let i = 0;
+        getAllFreeFields(LeftField);
 
-    function getAllFreeFields(field) {
+        function getAllFreeFields(field) {
 
-        let FreeDirections = [];
+            let FreeDirections = [];
 
-        for (let direction = 0; direction < 4, direction++) {
+            for (let direction = 0; direction < 4, direction++) {
 
-            let TestThisField = getNeighbourField(field, direction);
-            if (!ObstacleOnPosition(TestThisField)) {
-                if (!ElementInArray(TestThisField, FreeFields)) {
-                    i++;
-                    FreeFields.push(TestThisField);
-                    FreeDirections.push(direction);
+                let TestThisField = getNeighbourField(field, direction);
+                if (!ObstacleOnPosition(TestThisField)) {
+                    if (!ElementInArray(TestThisField, FreeFields)) {
+                        i++;
+                        FreeFields.push(TestThisField);
+                        FreeDirections.push(direction);
+                    }
                 }
             }
-        }
 
-        if (i <= 10) {
-            for (let direction of FreeDirections) {
-                getAllFreeFields(getNeighbourField(field, direction));
+            if (i <= 10) {
+                for (let direction of FreeDirections) {
+                    getAllFreeFields(getNeighbourField(field, direction));
+                }
             }
+
         }
 
-    }
+        function getNeighbourField(StartField, direction) {
+            // direction : {left: 0, right: 1, up: 2, down: 3}
+            let NeighbourField = [offsets[direction][0] + StartField.x, offsets[direction][1] + StartField.y];
+            return NeighbourField;
+        }
 
-    function getNeighbourField(StartField, direction) {
-        // direction : {left: 0, right: 1, up: 2, down: 3}
-        let NeighbourField = [offsets[direction][0] + StartField.x, offsets[direction][1] + StartField.y];
-        return NeighbourField;
-    }
+        console.log(FreeFields.length);
 
-    console.log(FreeFields.length);
-
-    if (FreeFields.length >= 10) {
-        //increase chance for direction
-    } else {
-        //decrease chance for direction proportional to FreeFields.length
-        //test if there will be a exit in x moves
-        //change chance for direction proportinal to chance for exit
+        if (FreeFields.length >= 10) {
+            //increased chance for direction
+        } else {    
+            //decrease chance for direction proportional to FreeFields.length
+            chances[d] -= Int(Math.pow(FreeFields.length, -1) * 80);
+            
+            //test if there will be a exit in x moves
+            //change chance for direction proportinal to chance for exit
+        }
     }
+    
     
 
     //Return Move
@@ -348,18 +343,6 @@ app.post('/move', (request, response) => {
         return [NULL, NULL];
     }
 })
-
-
-
-
-
-
-
-
-
-
-
-
 
 app.post('/end', (request, response) => {
   // NOTE: Any cleanup when a game is complete.
