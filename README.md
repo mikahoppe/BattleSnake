@@ -1,7 +1,7 @@
 # PhoenixProgramming (NodeJS)
 
 [Battlesnake AI](https://battlesnake.io) written in Javascript for NodeJS.  
-_Copyrigth @ PhoenixProgramming_
+_copyrigth @ PhoenixProgramming_
 
 ## Deploying to Heroku
 
