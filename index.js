@@ -150,8 +150,6 @@ app.post('/move', (request, response) => {
     }
   }
   
-  //edit
-
   for (let i = 0; i < 4; i++) {
     for (snake of data.board.snakes) {
       position = [MySnakesHead.x + offsets[i][0], MySnakesHead.y + offsets[i][1]];
