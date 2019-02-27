@@ -14,20 +14,12 @@ git push
 
 ## Deploying to Heroku
 
-Push code to Heroku servers:
-
 ```shell
+heroku login
 git push heroku master
 ```
 
-Open Heroku app in browser:
-
 ```shell
 heroku open
-```
-
-View/stream server logs:
-
-```shell
 heroku logs --tail
 ```
