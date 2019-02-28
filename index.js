@@ -61,10 +61,10 @@ app.post('/move', (request, response) => {
 
     /*
      * NULL: 0,
-     * SNAKETAIL: 1,
-     * SNAKE: 2,
-     * SNAKEHEAD: 3,
-     * FOOD: -4
+     * FOOD: 1,
+     * SNAKETAIL: 2,
+     * SNAKE: 3,
+     * SNAKEHEAD: 4
     */
 
     let GameBoard = new Array(data.board.width);
