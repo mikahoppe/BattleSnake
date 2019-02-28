@@ -222,16 +222,22 @@ app.post('/move', (request, response) => {
     for (let d = 0; d < 4; d++) {
         let StartField = MySnakesHead;
 
-        let LeftField = getNeighbourField(StartField, d);
-        let FreeFields = [];
+        let TestField = getNeighbourField(StartField, d);
+        let FreeFields = new Array();
         let i = 0;
-        getAllFreeFields(LeftField);
+        getAllFreeFields(TestField);
 
-        if (FreeFields.length >= 10) {
+        console.log(FreeFields.length);
+
+        if (i >= 10) {
             //increased chance for direction
         } else {    
             //decrease chance for direction proportional to FreeFields.length
-            //chances[d] -= Int(Math.pow(FreeFields.length, -1) * 80);
+            if (i == 0) {
+                chances[d] == 0;
+            } else {
+                chances[d] -= parseInt(Math.pow(FreeFields.length, -1) * 80);
+            }
             
             //test if there will be a exit in x moves
             //change chance for direction proportinal to chance for exit
@@ -241,7 +247,7 @@ app.post('/move', (request, response) => {
 
             /*
              * TODO:
-             * test if working
+             * doubles
             */
     
             let FreeDirections = [];
@@ -251,9 +257,9 @@ app.post('/move', (request, response) => {
     
                     let TestThisField = getNeighbourField(field, direction);
                     if (!ObstacleOnPosition([TestThisField.x, TestThisField.y])) {
-                        if (!ElementInArray(TestThisField, FreeFields)) {
+                        if (!FieldInArray(TestThisField, FreeFields)) {
                             i++;
-                            FreeFields.push(TestThisField);
+                            //FreeFields.push(f);
                             FreeDirections.push(direction);
                         }
                     }
@@ -267,6 +273,16 @@ app.post('/move', (request, response) => {
             }
     
         }
+    }
+
+    function FieldInArray(e, arr) {
+        let FLAG = false;
+        for (i of arr) {
+            if (i.x == e.x && i.y == e.y) {
+                FLAG = true;
+            }
+        }
+        return FLAG;
     }
 
     function getNeighbourField(StartField, direction) {
@@ -290,7 +306,7 @@ app.post('/move', (request, response) => {
         */ 
         
         let OffsetToPrimalFood = [PrimalFood.x - MySnakesHead.x, PrimalFood.y - MySnakesHead.y];
-        if (data.you.health <= 40) {
+        if (data.you.health <= 50) {
             ChanceChange = 25;
         } else {
             ChanceChange = 0;
