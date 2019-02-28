@@ -213,6 +213,22 @@ app.post('/move', (request, response) => {
                 chances[i] -= difference;
             }
         }
+      
+        for (let i = 0; i < 4; i++) {
+            for (snake of data.board.snakes) {
+                position = [MySnakesHead.x + offsets[i][0], MySnakesHead.y + offsets[i][1]];
+                //test for next move head of other snake
+                for (let offset of offsets) {
+                    if (snake.body[0].x == position[0] + offset[0] && snake.body[0].y == position[1] + offset[1] && snake.id != data.you.id && chances[i] > 0) {
+                        if (snake.body.length >= MyLength) {
+                            chances[i] -= 30;
+                        } else {
+                            chances[i] += 30;
+                        }
+                    }
+                }
+            }
+        }
     }
     
     /*
