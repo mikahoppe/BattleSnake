@@ -1,3 +1,4 @@
+    
 const bodyParser = require('body-parser')
 const express = require('express')
 const logger = require('morgan')
@@ -235,6 +236,15 @@ app.post('/move', (request, response) => {
      * Test for close room < 10 on neighbour fields
     */
 
+    class field {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    let f;
+
     for (let d = 0; d < 4; d++) {
         let StartField = MySnakesHead;
 
@@ -275,7 +285,8 @@ app.post('/move', (request, response) => {
                     if (!ObstacleOnPosition([TestThisField.x, TestThisField.y])) {
                         if (!FieldInArray(TestThisField, FreeFields)) {
                             i++;
-                            //FreeFields.push(f);
+                            f = new field(x, y);
+                            FreeFields.push(f);
                             FreeDirections.push(direction);
                         }
                     }
@@ -293,8 +304,8 @@ app.post('/move', (request, response) => {
 
     function FieldInArray(e, arr) {
         let FLAG = false;
-        for (i of arr) {
-            if (i.x == e.x && i.y == e.y) {
+        for (let f of arr) {
+            if (f.x == e.x && f.y == e.y) {
                 FLAG = true;
             }
         }
@@ -383,10 +394,8 @@ app.post('/move', (request, response) => {
         /*
         let FreeOffset;
         let CountFreeOffsets = 0;
-
         for (offset of offsets) {
             let OffOffset = [StartOffset[0] + offset[0], StartOffset[1] + offset[1]];
-
             if (!ElementInArray(OffOffset, TestedOffsets)) {
                 TestedOffsets[TestedOffsets.length] = OffOffset;
                 if (!ObstacleOnPosition(OffOffset)) {
@@ -450,7 +459,7 @@ app.post('/move', (request, response) => {
             }
         }
         for (snake of data.board.snakes) {
-            for (let i = 0; i < snake.body.length; i++) {
+            for (let i = 0; i < snake.body.length; i++) {
                 let body = snake.body[i];
                 if (body.x == tile[0] && body.y == tile[1]) {
                     return [snake, i];
