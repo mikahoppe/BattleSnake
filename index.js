@@ -285,8 +285,8 @@ app.post('/move', (request, response) => {
                     if (!ObstacleOnPosition([TestThisField.x, TestThisField.y])) {
                         if (!FieldInArray(TestThisField, FreeFields)) {
                             i++;
-                            //f = new field(TestThisField.x, TestThisField.y);
-                            //FreeFields.push(f);
+                            FreeFields.push(TestThisField.x);
+                            FreeFields.push(TestThisField.y);
                             FreeDirections.push(direction);
                         }
                     }
@@ -304,9 +304,18 @@ app.post('/move', (request, response) => {
 
     function FieldInArray(e, arr) {
         let FLAG = false;
+        let switch = false;
         for (let f of arr) {
-            if (f.x == e.x && f.y == e.y) {
-                FLAG = true;
+            if (switch == false) {
+                if (f.x == e.x) {
+                    FLAG = true;
+                }
+                switch = true;
+            } else {
+                if (f.y == e.y && FLAG == true) {
+                    return true;
+                }
+                FLAG = false;
             }
         }
         return FLAG;
