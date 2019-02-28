@@ -226,7 +226,7 @@ app.post('/move', (request, response) => {
 
         let FreeDirections = [];
 
-        for (let direction = 0; direction < 4, direction++) {
+        for (let direction = 0; direction < 4; direction++) {
 
             let TestThisField = getNeighbourField(field, direction);
             if (!ObstacleOnPosition(TestThisField)) {
