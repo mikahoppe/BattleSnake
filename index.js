@@ -285,7 +285,7 @@ app.post('/move', (request, response) => {
                     if (!ObstacleOnPosition([TestThisField.x, TestThisField.y])) {
                         if (!FieldInArray(TestThisField, FreeFields)) {
                             i++;
-                            f = new field(x, y);
+                            f = new field(TestThisField.x, TestThisField.y);
                             FreeFields.push(f);
                             FreeDirections.push(direction);
                         }
