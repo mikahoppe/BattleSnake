@@ -304,7 +304,7 @@ app.post('/move', (request, response) => {
 
     function FieldInArray(e, arr) {
         let FLAG = false;
-        let switch = false;
+        /*let switch = false;
         for (let f of arr) {
             if (switch == false) {
                 if (f.x == e.x) {
@@ -317,7 +317,7 @@ app.post('/move', (request, response) => {
                 }
                 FLAG = false;
             }
-        }
+        }*/
         return FLAG;
     }
 
