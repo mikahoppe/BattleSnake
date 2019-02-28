@@ -432,7 +432,7 @@ app.post('/move', (request, response) => {
 
         //test for snake
         if (FLAG == false) {
-            if (GameBoard[position.y][position.x] >= 3) {
+            if (GameBoard[position.y][position.x] >= 2) {
                 FLAG = true
             }
         }
