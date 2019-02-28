@@ -39,12 +39,14 @@ app.post('/start', (request, response) => {
 app.post('/move', (request, response) => {
 
     //standard move
-    let move = 'left';
+    let nextMove = 'left';
 
     let data = request.body;
     let directions = ['left', 'right', 'up', 'down'];
     let offsets = [[-1, 0],[1, 0],[0, -1],[0, 1]];
     let chances = [100, 100, 100, 100];
+
+    let PrimalFood = data.board.food[0];
 
     // let NextMovement = {left: {move: 'left', offset: [-1, 0], chance: 100}, right: {move: 'right', offset: [1, 0], chance: 100}, up: {move: 'up', offset: [0, -1], chance: 100}, down: {move: 'down', offset: [0, 1], chance: 100}};
 
@@ -52,6 +54,8 @@ app.post('/move', (request, response) => {
     let MyLength = data.you.body.length;
 
     let TestedOffsets = [[0, 0]];
+
+    console.log(data.turn);
 
     //Initialize GameBoard Array
 
@@ -63,19 +67,35 @@ app.post('/move', (request, response) => {
      * FOOD: -4
     */
 
-    let GameBoard = Array(data.board.width - 1).fill(Array(data.board.width - 1).fill(0));
+    let GameBoard = new Array(data.board.width);
+    for (let i = 0; i < GameBoard.length; i++) {
+        GameBoard[i] = new Array(data.board.height).fill(0);
+    }
+
     initializeSnakes();
 
     function initializeSnakes() {
-        for (snake of data.board.snakes) {
-            for (tile of snake.body) {
+        for (let snake of data.board.snakes) {
+            GameBoard[snake.body[snake.body.length - 1].y][snake.body[snake.body.length - 1].x] = 2;
+
+            for (let tile of snake.body) {
                 if (tile == snake.body[0]) {
-                    GameBoard[tile.x][tile.y] += 1;
+                    GameBoard[tile.y][tile.x] = 4;
+                } else if (tile != snake.body[snake.body.length - 1]) {
+                    GameBoard[tile.y][tile.x] = 3;
                 }
-                if (tile == snake.body[snake.body.length - 1]) {
-                    GameBoard[tile.x][tile.y] -= 1;
-                }
-                GameBoard[tile.x][tile.y] += 2;
+            }
+
+
+        }
+
+        GameBoard[data.you.body[data.you.body.length - 1].y][data.you.body[data.you.body.length - 1].x] = 2;
+
+        for (let tile of data.you.body) {
+            if (tile == data.you.body[0]) {
+                GameBoard[tile.y][tile.x] = 4;
+            } else if (tile != data.you.body[data.you.body.length - 1]) {
+                GameBoard[tile.y][tile.x] = 3;
             }
         }
     }
@@ -83,11 +103,14 @@ app.post('/move', (request, response) => {
     initializeFoods();
 
     function initializeFoods() {
-        for (food of data.board.food) {
-            GameBoard[food.x][food.y] -= 4
+        for (let food of data.board.food) {
+            GameBoard[food.y][food.x] = 1
         }
     }
 
+    for (e of GameBoard) {
+        console.log(e);
+    }
 
     /*
      * get nearest piece of food as PrimalFood
@@ -109,7 +132,7 @@ app.post('/move', (request, response) => {
     let BoardArea = data.board.height * data.board.width;
     let RemainingArea = BoardArea;
     for (let snake of data.board.snakes) {
-        RemainingArea -= snake.body.length;
+        RemainingArea -= snake.body.length
     }
 
     /*
@@ -117,6 +140,7 @@ app.post('/move', (request, response) => {
     */
 
     for (let o = 0; o < 4; o++) {
+        console.log(ObstacleOnPosition(offsets[o]));
         if (ObstacleOnPosition(offsets[o])) {
             chances[o] = 0;
         }
@@ -179,7 +203,6 @@ app.post('/move', (request, response) => {
                 }
             }
             if (difference >= 30 && chances[i] > 0) {
-                //Teste Ausweg aus Tunnel
                 TestedOffsets = [[0, 0]];
                 if (TunnelHasExit(offsets[i])) {
                     chances[i] = 40;
@@ -204,51 +227,51 @@ app.post('/move', (request, response) => {
         let i = 0;
         getAllFreeFields(LeftField);
 
-        console.log(FreeFields.length);
-
         if (FreeFields.length >= 10) {
             //increased chance for direction
         } else {    
             //decrease chance for direction proportional to FreeFields.length
-            chances[d] -= Int(Math.pow(FreeFields.length, -1) * 80);
+            //chances[d] -= Int(Math.pow(FreeFields.length, -1) * 80);
             
             //test if there will be a exit in x moves
             //change chance for direction proportinal to chance for exit
         }
-    }
 
-    function getAllFreeFields(field) {
+        function getAllFreeFields(field) {
 
-        /*
-         * TODO:
-         * test if working
-        */
+            /*
+             * TODO:
+             * test if working
+            */
+    
+            let FreeDirections = [];
 
-        let FreeDirections = [];
-
-        for (let direction = 0; direction < 4; direction++) {
-
-            let TestThisField = getNeighbourField(field, direction);
-            if (!ObstacleOnPosition(TestThisField)) {
-                if (!ElementInArray(TestThisField, FreeFields)) {
-                    i++;
-                    FreeFields.push(TestThisField);
-                    FreeDirections.push(direction);
+            if (!ObstacleOnPosition([field.x, field.y])) {
+                for (let direction = 0; direction < 4; direction++) {
+    
+                    let TestThisField = getNeighbourField(field, direction);
+                    if (!ObstacleOnPosition([TestThisField.x, TestThisField.y])) {
+                        if (!ElementInArray(TestThisField, FreeFields)) {
+                            i++;
+                            FreeFields.push(TestThisField);
+                            FreeDirections.push(direction);
+                        }
+                    }
+                }
+        
+                for (let direction of FreeDirections) {
+                    if (i <= 10) {
+                        getAllFreeFields(getNeighbourField(field, direction));
+                    }
                 }
             }
+    
         }
-
-        if (i <= 10) {
-            for (let direction of FreeDirections) {
-                getAllFreeFields(getNeighbourField(field, direction));
-            }
-        }
-
     }
 
     function getNeighbourField(StartField, direction) {
         // direction : {left: 0, right: 1, up: 2, down: 3}
-        let NeighbourField = [offsets[direction][0] + StartField.x, offsets[direction][1] + StartField.y];
+        let NeighbourField = {x: offsets[direction][0] + StartField.x, y: offsets[direction][1] + StartField.y};
         return NeighbourField;
     }
 
@@ -265,7 +288,7 @@ app.post('/move', (request, response) => {
          * if equal chances on different directions, then prefer food direction
          * if health decreased , then (proportional chance) turn to food direction
         */ 
-
+        
         let OffsetToPrimalFood = [PrimalFood.x - MySnakesHead.x, PrimalFood.y - MySnakesHead.y];
         if (data.you.health <= 40) {
             ChanceChange = 25;
@@ -283,13 +306,12 @@ app.post('/move', (request, response) => {
             chances[3] += ChanceChange;
         }
     }
-    
+
     /*
      * return move
     */
 
     let max = -Infinity;
-    let nextMove = 'left';
     for (let i = 0; i < 4; i++) {
         if (chances[i] > max) {
             max = chances[i];
@@ -297,11 +319,16 @@ app.post('/move', (request, response) => {
         }
     }
 
+    for (let o = 0; o < 4; o++) {
+        if (ObstacleOnPosition(offsets[o])) {
+            chances[o] = 0;
+        }
+    }
+
     /*
      * logs
     */
 
-    console.log(data.turn);
     for (let i = 0; i < 4; i++) {
         console.log(chances[i]);
     }
@@ -319,8 +346,9 @@ app.post('/move', (request, response) => {
     //teste von StartOffset alle Nachbarfelder ob frei
     //ignoriere bereits getestete Felder
 
-    /*function TunnelHasExit (StartOffset) {
-    
+    function TunnelHasExit (StartOffset) {
+        return true;
+        /*
         let FreeOffset;
         let CountFreeOffsets = 0;
 
@@ -341,8 +369,8 @@ app.post('/move', (request, response) => {
             return false;
         } else {
             return true;
-        }
-    }*/
+        }*/
+    }
 
     function ElementInArray(elem, arr) {
         let FLAG = false;
@@ -355,8 +383,10 @@ app.post('/move', (request, response) => {
     }
 
     function ObstacleOnPosition (offset) {
+
         let FLAG = false;
         let position = {x: 0, y: 0};
+
         position.x = MySnakesHead.x + offset[0];
         position.y = MySnakesHead.y + offset[1];
 
@@ -369,11 +399,14 @@ app.post('/move', (request, response) => {
         }
 
         //test for snake
-        if (GameBoard[position.x][position.y] != 0 && GameBoard[position.x][position.y] > -3) {
-            FLAG = true;
+        if (FLAG == false) {
+            if (GameBoard[position.y][position.x] >= 2) {
+                FLAG = true
+            }
         }
 
         return FLAG;
+        
     }
 
     function GetSnakeAndPositionToTile (tile) {
@@ -398,7 +431,7 @@ app.post('/move', (request, response) => {
 
 app.post('/end', (request, response) => {
   // NOTE: Any cleanup when a game is complete.
-  return response.json({})
+  return response.json({});
 })
 
 app.post('/ping', (request, response) => {
