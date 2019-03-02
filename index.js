@@ -115,11 +115,13 @@ app.post('/move', (request, response) => {
      
     }
 
+    let PrimalFood;
+
     try {
-        let PrimalFood = data.board.food[0];
+        PrimalFood = data.board.food[0];
         getNearestPieceOfFoodAsPrimalFood();
     } catch (e) {
-        let PrimalFood = [NULL, NULL];
+        PrimalFood = [NULL, NULL];
     }
     
 
