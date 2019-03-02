@@ -117,12 +117,10 @@ app.post('/move', (request, response) => {
 
     let PrimalFood;
 
-    if (data.board.food.length == 0) {
-        PrimalFood = NULL;
-    } else {
-        PrimalFood = data.board.food[0];
+    if (data.board.food.length != 0) {
         getNearestPieceOfFoodAsPrimalFood();
-    } 
+        PrimalFood = data.board.food[0];
+    }
 
     function getNearestPieceOfFoodAsPrimalFood () {
 
@@ -140,7 +138,7 @@ app.post('/move', (request, response) => {
 
     console.log("LOG: No. 1");
 
-    if (PrimalFood != NULL) {
+    if (data.board.food.length != 0) {
         FoodInfluences();
     }
 
