@@ -293,11 +293,19 @@ app.post('/move', (request, response) => {
             let DistanceToMySnakeHead = Math.abs(snakehead.x - MySnakesHead.x) + Math.abs(snakehead.y - MySnakesHead.y);
             let SnakeLength = snake.body.length;
     
-            let changeAmountChance = SnakeLength >= MyLength ? -50 : 20;
-    
             if (DistanceToMySnakeHead == 2) {
 
                 let OffsetToMySnakesHead = {x: snakehead.x - MySnakesHead.x, y: snakehead.y - MySnakesHead.y};
+
+                let countMovingPossibilitiesOpponent = 4;
+                for (let d = 0; d < 4; d++) {
+                    let position = {x: snakehead.x + offsets[d][0], y: snakehead.y + offsets[d][1]};
+                    if (ObstacleOnTile(position)) {
+                        countMovingPossibilitiesOpponent--;
+                    }
+                }
+
+                let changeAmountChance = SnakeLength >= MyLength ? -100 / countMovingPossibilitiesOpponent : 100 / countMovingPossibilitiesOpponent - 15;
 
                 if (OffsetToMySnakesHead.x < 0) {
                     chances[0] += changeAmountChance;
