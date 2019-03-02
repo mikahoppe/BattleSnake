@@ -288,6 +288,7 @@ app.post('/move', (request, response) => {
         for (snake of data.board.snakes) {
     
             let snakehead = snake.body[0];
+            let OpponentChances = [0, 0, 0, 0];
 
             let DistanceToMySnakeHead = Math.abs(snakehead.x - MySnakesHead.x) + Math.abs(snakehead.y - MySnakesHead.y);
             let SnakeLength = snake.body.length;
@@ -310,7 +311,36 @@ app.post('/move', (request, response) => {
                     chances[3] += changeAmountChance;
                 }
 
-            } 
+            } else if (DistanceToMySnakeHead == 3) {
+                let countFreeFields = 0;
+                for (let d = 0; d < 4; d++) {
+                    let position = {x: snakeshead.x + offset[0], y: snakeshead.y + offset[1]};
+                    if (ObstacleOnTile (position)) {
+                        countFreeFields++;
+                    }
+                }
+                for (let d = 0; d < 4; d++) {
+                    let position = {x: snakeshead.x + offset[0], y: snakeshead.y + offset[1]};
+                    if (ObstacleOnTile (position)) {
+                        OpponentChances[d] = 100 / countFreeFields;
+                    }
+
+                    let distanceToMe = Math.abs(position.x - MySnakesHead.x) + Math.abs(position.y - MySnakesHead.y);
+                    let OffsetToMyHead = [position.x - MySnakesHead.x, position.y - MySnakesHead.y];
+                    if (distanceToMe == 2) {
+                        if (OffsetToMyHead[0] < 0) {
+                            chances[0] -= 5;
+                        } else if (OffsetToMyHead[0] > 0) {
+                            chances[1] -= 5;
+                        }
+                        if (OffsetToMyHead[1] < 0) {
+                            chances[2] -= 5;
+                        } else if (OffsetToMyHead[1] > 0) {
+                            chances[3] -= 5;
+                        }
+                    }
+                }
+            }
         }
 
     }
@@ -416,12 +446,12 @@ app.post('/move', (request, response) => {
 
     }
 
-    function ObstacleOnOffsetOfOpponent (snake, offset) {
+    function ObstacleOnOffsetOfOpponent (snakeshead, offset) {
 
         let position = {x: 0, y: 0};
 
-        position.x = snake.body[0].x + offset[0];
-        position.y = snake.body[0].y + offset[1];
+        position.x = snakeshead.x + offset[0];
+        position.y = snakeshead.y + offset[1];
 
         return ObstacleOnTile(position);
 
