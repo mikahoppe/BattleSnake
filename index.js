@@ -242,9 +242,11 @@ app.post('/move', (request, response) => {
         AvgFreeFields += element / FreeFieldInDirections.length;
     }
 
-    if (!(MaxFreeFields == MinFreeFields)) {
+    if (MaxFreeFields != MinFreeFields) {
         for (let d = 0; d < 4; d++) {
-            chances[d] -= 100 * (AvgFreeFields - FreeFieldInDirections[d]) / AvgFreeFields;
+            if (FreeFieldInDirections[d] < MyLength) {
+                chances[d] -= 100 * (AvgFreeFields - FreeFieldInDirections[d]) / AvgFreeFields;
+            }
         }
     }
 
