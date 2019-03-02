@@ -92,13 +92,13 @@ app.post('/move', (request, response) => {
         }
     }
 
-    /*initializeFoods();
+    initializeFoods();
 
     function initializeFoods() {
         for (let food of data.board.food) {
             GameBoard[food.y][food.x] = 1
         }
-    }*/
+    }
 
     let BoardArea = 0;
     let RemainingArea = 0;
