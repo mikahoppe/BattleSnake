@@ -106,6 +106,7 @@ app.post('/move', (request, response) => {
     calculateRemainingArea();
 
     function calculateRemainingArea () {
+
         BoardArea = data.board.height * data.board.width;
         RemainingArea = BoardArea;
         for (let snake of data.board.snakes) {
@@ -114,8 +115,12 @@ app.post('/move', (request, response) => {
      
     }
 
-    let PrimalFood = data.board.food[0];
-    getNearestPieceOfFoodAsPrimalFood();
+    let PrimalFood;
+
+    if (data.board.food.length != 0) {
+        getNearestPieceOfFoodAsPrimalFood();
+        PrimalFood = data.board.food[0];
+    }
 
     function getNearestPieceOfFoodAsPrimalFood () {
 
@@ -131,7 +136,11 @@ app.post('/move', (request, response) => {
 
     }
 
-    FoodInfluences();
+    console.log("LOG: No. 1");
+
+    if (data.board.food.length != 0) {
+        FoodInfluences();
+    }
 
     function FoodInfluences() {
 
@@ -159,12 +168,15 @@ app.post('/move', (request, response) => {
         }
     }
 
+    console.log("LOG: No. 2");
+
     let FreeFieldInDirections = [0, 0, 0, 0];
     countFreeFieldsInDirections();
 
     function countFreeFieldsInDirections () {
         for (let d = 0; d < 4; d++) {
 
+            let GoneDirections = [];
             let TestField = getNeighbourField(MySnakesHead, d);
     
             function getNeighbourField(StartField, direction) {
@@ -179,6 +191,20 @@ app.post('/move', (request, response) => {
             getAllFreeFields(TestField);
     
             FreeFieldInDirections[d] = i;
+
+            if (alwaysTheSame(GoneDirections)) {
+                chances[d] -= 30;
+            }
+
+            function alwaysTheSame (array) {
+                for (let k = 0; k < array.length - 1; k++) {
+                    if (array[k] != array[k + 1]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
                 
             //test if there will be a exit in x moves
             //change chance for direction proportinal to chance for exit
@@ -200,6 +226,7 @@ app.post('/move', (request, response) => {
                         let TestThisField = getNeighbourField(field, direction);
                         if (!ObstacleOnTile(TestThisField)) {
                             if (!FieldInArray(TestThisField, FreeFields)) {
+                                GoneDirections.push(direction);
                                 i++;
                                 FreeFields.push(TestThisField.x);
                                 FreeFields.push(TestThisField.y);
@@ -209,14 +236,8 @@ app.post('/move', (request, response) => {
                     }
             
                     for (let direction of FreeDirections) {
-                        if (RemainingArea <= 40) {
-                            if (i < RemainingArea) {
-                                getAllFreeFields(getNeighbourField(field, direction));
-                            }
-                        } else {
-                            if (i < RemainingArea / 2) {
-                                getAllFreeFields(getNeighbourField(field, direction));
-                            }
+                        if (i < RemainingArea) {
+                            getAllFreeFields(getNeighbourField(field, direction));
                         }
                     }
                 }
@@ -239,6 +260,8 @@ app.post('/move', (request, response) => {
         }
     }
 
+    console.log("LOG: No. 3");
+
     /* TODO: Auswertung FreeFieldsInDirection */
     let MaxFreeFields = Math.max(...FreeFieldInDirections);
     let MinFreeFields = Math.min(...FreeFieldInDirections);
@@ -256,6 +279,8 @@ app.post('/move', (request, response) => {
         }
     }
 
+    console.log("LOG: No. 4");
+
     testForComingSnake();
 
     function testForComingSnake () {
@@ -267,7 +292,7 @@ app.post('/move', (request, response) => {
             let DistanceToMySnakeHead = Math.abs(snakehead.x - MySnakesHead.x) + Math.abs(snakehead.y - MySnakesHead.y);
             let SnakeLength = snake.body.length;
     
-            let changeAmountChance = SnakeLength >= MyLength ? -50 : 50;
+            let changeAmountChance = SnakeLength >= MyLength ? -50 : 20;
     
             if (DistanceToMySnakeHead == 2) {
 
@@ -348,6 +373,8 @@ app.post('/move', (request, response) => {
             }
         }
     }
+
+    console.log("LOG: No. 5");
     
     for (let o = 0; o < 4; o++) {
         if (ObstacleOnOffset(offsets[o])) {
