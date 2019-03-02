@@ -92,13 +92,13 @@ app.post('/move', (request, response) => {
         }
     }
 
-    initializeFoods();
+    /*initializeFoods();
 
     function initializeFoods() {
         for (let food of data.board.food) {
             GameBoard[food.y][food.x] = 1
         }
-    }
+    }*/
 
     let BoardArea = 0;
     let RemainingArea = 0;
@@ -283,7 +283,7 @@ app.post('/move', (request, response) => {
             let DistanceToMySnakeHead = Math.abs(snakehead.x - MySnakesHead.x) + Math.abs(snakehead.y - MySnakesHead.y);
             let SnakeLength = snake.body.length;
     
-            let changeAmountChance = SnakeLength >= MyLength ? -50 : 50;
+            let changeAmountChance = SnakeLength >= MyLength ? -50 : 20;
     
             if (DistanceToMySnakeHead == 2) {
 
