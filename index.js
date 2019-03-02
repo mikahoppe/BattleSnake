@@ -209,8 +209,14 @@ app.post('/move', (request, response) => {
                     }
             
                     for (let direction of FreeDirections) {
-                        if (i < RemainingArea) {
-                            getAllFreeFields(getNeighbourField(field, direction));
+                        if (RemainingArea <= 40) {
+                            if (i < RemainingArea) {
+                                getAllFreeFields(getNeighbourField(field, direction));
+                            }
+                        } else {
+                            if (i < RemainingArea / 2) {
+                                getAllFreeFields(getNeighbourField(field, direction));
+                            }
                         }
                     }
                 }
@@ -291,7 +297,7 @@ app.post('/move', (request, response) => {
         for (let i = 0; i < 4; i++) {
             borderingField = 0;
             for (let offset of offsets) {
-                if (ObstacleOnPosition([offsets[i][0] + offset[0], offsets[i][1] + offset[1]]) && chances[i] > 0) {
+                if (ObstacleOnOffset([offsets[i][0] + offset[0], offsets[i][1] + offset[1]]) && chances[i] > 0) {
                     borderingField += 1;
                 }
             }
@@ -344,12 +350,12 @@ app.post('/move', (request, response) => {
     }
     
     for (let o = 0; o < 4; o++) {
-        if (ObstacleOnPosition(offsets[o])) {
+        if (ObstacleOnOffset(offsets[o])) {
             chances[o] = 0;
         }
     }
 
-    function ObstacleOnPosition (offset) {
+    function ObstacleOnOffset (offset) {
 
         let position = {x: 0, y: 0};
 
@@ -380,6 +386,17 @@ app.post('/move', (request, response) => {
         }
 
         return FLAG;
+
+    }
+
+    function ObstacleOnOffsetOfOpponent (snake, offset) {
+
+        let position = {x: 0, y: 0};
+
+        position.x = snake.body[0].x + offset[0];
+        position.y = snake.body[0].y + offset[1];
+
+        return ObstacleOnTile(position);
 
     }
 
