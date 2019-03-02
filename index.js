@@ -106,6 +106,7 @@ app.post('/move', (request, response) => {
     calculateRemainingArea();
 
     function calculateRemainingArea () {
+
         BoardArea = data.board.height * data.board.width;
         RemainingArea = BoardArea;
         for (let snake of data.board.snakes) {
@@ -230,7 +231,7 @@ app.post('/move', (request, response) => {
                                 getAllFreeFields(getNeighbourField(field, direction));
                             }
                         } else {
-                            if (i < RemainingArea / 2) {
+                            if (i < Math.max(RemainingArea / 2, MyLength)) {
                                 getAllFreeFields(getNeighbourField(field, direction));
                             }
                         }
