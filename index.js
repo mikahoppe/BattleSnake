@@ -263,17 +263,17 @@ app.post('/move', (request, response) => {
     
             if (DistanceToMySnakeHead == 2) {
 
-                let OffsetToMySnakesHead = {x: Math.sign(snake.x - MySnakesHead.x), y: Math.sign(snake.y - MySnakesHead.y)};
+                let OffsetToMySnakesHead = {x: snake.x - MySnakesHead.x, y: snake.y - MySnakesHead.y};
 
-                if (OffsetToMySnakesHead.x == -1) {
+                if (OffsetToMySnakesHead.x < 0) {
                     chances[0] += changeAmountChance;
-                } else if (OffsetToMySnakesHead.x == 1) {
+                } else if (OffsetToMySnakesHead.x > 0) {
                     chances[1] += changeAmountChance;
                 }
 
-                if (OffsetToMySnakesHead.y == -1) {
+                if (OffsetToMySnakesHead.y < 0) {
                     chances[2] += changeAmountChance;
-                } else if (OffsetToMySnakesHead.y == 1) {
+                } else if (OffsetToMySnakesHead.y > 0) {
                     chances[3] += changeAmountChance;
                 }
 
