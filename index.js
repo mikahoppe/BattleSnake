@@ -226,7 +226,7 @@ app.post('/move', (request, response) => {
                     }
             
                     for (let direction of FreeDirections) {
-                        if (RemainingArea <= 40) {
+                        if (RemainingArea <= 30) {
                             if (i < RemainingArea) {
                                 getAllFreeFields(getNeighbourField(field, direction));
                             }
