@@ -136,8 +136,6 @@ app.post('/move', (request, response) => {
 
     }
 
-    console.log("LOG: No. 1");
-
     if (data.board.food.length != 0) {
         FoodInfluences();
     }
@@ -167,8 +165,6 @@ app.post('/move', (request, response) => {
             chances[3] += ChanceChange;
         }
     }
-
-    console.log("LOG: No. 2");
 
     let FreeFieldInDirections = [0, 0, 0, 0];
     countFreeFieldsInDirections();
@@ -260,8 +256,6 @@ app.post('/move', (request, response) => {
         }
     }
 
-    console.log("LOG: No. 3");
-
     /* TODO: Auswertung FreeFieldsInDirection */
     let MaxFreeFields = Math.max(...FreeFieldInDirections);
     let MinFreeFields = Math.min(...FreeFieldInDirections);
@@ -278,8 +272,6 @@ app.post('/move', (request, response) => {
             }
         }
     }
-
-    console.log("LOG: No. 4");
 
     testForComingSnake();
 
@@ -411,8 +403,6 @@ app.post('/move', (request, response) => {
             }
         }
     }
-
-    console.log("LOG: No. 5");
     
     for (let o = 0; o < 4; o++) {
         if (ObstacleOnOffset(offsets[o])) {
@@ -470,7 +460,7 @@ app.post('/move', (request, response) => {
     */
 
     for (let i = 0; i < 4; i++) {
-        console.log(chances[i]);
+        console.log(directions[i] + ": " + chances[i]);
     }
 
     max = -Infinity;
