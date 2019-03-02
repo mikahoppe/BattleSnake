@@ -161,7 +161,7 @@ app.post('/move', (request, response) => {
     }
 
     let FreeFieldInDirections = [0, 0, 0, 0];
-    /*countFreeFieldsInDirections();
+    countFreeFieldsInDirections();
 
     function countFreeFieldsInDirections () {
         for (let d = 0; d < 4; d++) {
@@ -199,7 +199,7 @@ app.post('/move', (request, response) => {
             //test if there will be a exit in x moves
             //change chance for direction proportinal to chance for exit
     
-            /*function getAllFreeFields(field) {
+            function getAllFreeFields(field) {
         
                 let FreeDirections = [];
     
@@ -257,7 +257,7 @@ app.post('/move', (request, response) => {
     }
 
     /* TODO: Auswertung FreeFieldsInDirection */
-    /*let MaxFreeFields = Math.max(...FreeFieldInDirections);
+    let MaxFreeFields = Math.max(...FreeFieldInDirections);
     let MinFreeFields = Math.min(...FreeFieldInDirections);
 
     let AvgFreeFields = 0;
@@ -271,7 +271,7 @@ app.post('/move', (request, response) => {
                 chances[d] -= 100 * (AvgFreeFields - FreeFieldInDirections[d]) / AvgFreeFields;
             }
         }
-    }*/
+    }
 
     testForComingSnake();
 
