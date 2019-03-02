@@ -165,6 +165,7 @@ app.post('/move', (request, response) => {
     function countFreeFieldsInDirections () {
         for (let d = 0; d < 4; d++) {
 
+            let GoneDirections = [];
             let TestField = getNeighbourField(MySnakesHead, d);
     
             function getNeighbourField(StartField, direction) {
@@ -179,6 +180,20 @@ app.post('/move', (request, response) => {
             getAllFreeFields(TestField);
     
             FreeFieldInDirections[d] = i;
+
+            if (alwaysTheSame(GoneDirections)) {
+                chances[d] -= 30;
+            }
+
+            function alwaysTheSame (array) {
+                for (let k = 0; k < array.length - 1; k++) {
+                    if (array[k] != array[k + 1]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
                 
             //test if there will be a exit in x moves
             //change chance for direction proportinal to chance for exit
@@ -200,6 +215,7 @@ app.post('/move', (request, response) => {
                         let TestThisField = getNeighbourField(field, direction);
                         if (!ObstacleOnTile(TestThisField)) {
                             if (!FieldInArray(TestThisField, FreeFields)) {
+                                GoneDirections.push(direction);
                                 i++;
                                 FreeFields.push(TestThisField.x);
                                 FreeFields.push(TestThisField.y);
