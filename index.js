@@ -256,14 +256,16 @@ app.post('/move', (request, response) => {
 
         for (snake of data.board.snakes) {
     
-            let DistanceToMySnakeHead = Math.abs(snake.x - MySnakesHead.x) + Math.abs(snake.y - MySnakesHead.y);
+            let snakehead = snake.body[0];
+
+            let DistanceToMySnakeHead = Math.abs(snakehead.x - MySnakesHead.x) + Math.abs(snakehead.y - MySnakesHead.y);
             let SnakeLength = snake.body.length;
     
             let changeAmountChance = SnakeLength >= MyLength ? -50 : 50;
     
             if (DistanceToMySnakeHead == 2) {
 
-                let OffsetToMySnakesHead = {x: snake.x - MySnakesHead.x, y: snake.y - MySnakesHead.y};
+                let OffsetToMySnakesHead = {x: snakehead.x - MySnakesHead.x, y: snakehead.y - MySnakesHead.y};
 
                 if (OffsetToMySnakesHead.x < 0) {
                     chances[0] += changeAmountChance;
@@ -296,48 +298,48 @@ app.post('/move', (request, response) => {
             
             borderingFields[i] = borderingField;
         }
-    }
 
-    if (chances[0] == chances[1]) {
-        if (borderingFields[0] > borderingFields[1]) {
-            chances[0]--;
-        } else if (borderingFields[0] < borderingFields[1]) {
-            chances[0]++;
+        if (chances[0] == chances[1]) {
+            if (borderingFields[0] > borderingFields[1]) {
+                chances[0]--;
+            } else if (borderingFields[0] < borderingFields[1]) {
+                chances[0]++;
+            }
         }
-    }
-    if (chances[0] == chances[2]) {
-        if (borderingFields[0] > borderingFields[2]) {
-            chances[0]--;
-        } else if (borderingFields[0] < borderingFields[2]) {
-            chances[0]++;
+        if (chances[0] == chances[2]) {
+            if (borderingFields[0] > borderingFields[2]) {
+                chances[0]--;
+            } else if (borderingFields[0] < borderingFields[2]) {
+                chances[0]++;
+            }
         }
-    }
-    if (chances[0] == chances[3]) {
-        if (borderingFields[0] > borderingFields[3]) {
-            chances[0]--;
-        } else if (borderingFields[0] < borderingFields[3]) {
-            chances[0]++;
+        if (chances[0] == chances[3]) {
+            if (borderingFields[0] > borderingFields[3]) {
+                chances[0]--;
+            } else if (borderingFields[0] < borderingFields[3]) {
+                chances[0]++;
+            }
         }
-    }
-    if (chances[1] == chances[2]) {
-        if (borderingFields[1] > borderingFields[2]) {
-            chances[1]--;
-        } else if (borderingFields[1] < borderingFields[2]) {
-            chances[1]++;
+        if (chances[1] == chances[2]) {
+            if (borderingFields[1] > borderingFields[2]) {
+                chances[1]--;
+            } else if (borderingFields[1] < borderingFields[2]) {
+                chances[1]++;
+            }
         }
-    }
-    if (chances[1] == chances[3]) {
-        if (borderingFields[1] > borderingFields[3]) {
-            chances[1]--;
-        } else if (borderingFields[1] < borderingFields[3]) {
-            chances[1]++;
+        if (chances[1] == chances[3]) {
+            if (borderingFields[1] > borderingFields[3]) {
+                chances[1]--;
+            } else if (borderingFields[1] < borderingFields[3]) {
+                chances[1]++;
+            }
         }
-    }
-    if (chances[2] == chances[3]) {
-        if (borderingFields[2] > borderingFields[3]) {
-            chances[2]--;
-        } else if (borderingFields[2] < borderingFields[3]) {
-            chances[2]++;
+        if (chances[2] == chances[3]) {
+            if (borderingFields[2] > borderingFields[3]) {
+                chances[2]--;
+            } else if (borderingFields[2] < borderingFields[3]) {
+                chances[2]++;
+            }
         }
     }
     
@@ -379,6 +381,14 @@ app.post('/move', (request, response) => {
 
         return FLAG;
 
+    }
+
+    /*
+     * logs
+    */
+
+    for (let i = 0; i < 4; i++) {
+        console.log(chances[i]);
     }
 
     max = -Infinity;
