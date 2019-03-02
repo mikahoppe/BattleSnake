@@ -259,7 +259,7 @@ app.post('/move', (request, response) => {
             let DistanceToMySnakeHead = Math.abs(snake.x - MySnakesHead.x) + Math.abs(snake.y - MySnakesHead.y);
             let SnakeLength = snake.body.length;
     
-            let changeAmountChance = SnakeLength >= MyLength ? -30 : 30;
+            let changeAmountChance = SnakeLength >= MyLength ? -50 : 50;
     
             if (DistanceToMySnakeHead == 2) {
 
