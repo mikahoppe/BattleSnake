@@ -115,8 +115,13 @@ app.post('/move', (request, response) => {
      
     }
 
-    let PrimalFood = data.board.food[0];
-    getNearestPieceOfFoodAsPrimalFood();
+    try {
+        let PrimalFood = data.board.food[0];
+        getNearestPieceOfFoodAsPrimalFood();
+    } catch (e) {
+        let PrimalFood = [NULL, NULL];
+    }
+    
 
     function getNearestPieceOfFoodAsPrimalFood () {
 
@@ -134,7 +139,9 @@ app.post('/move', (request, response) => {
 
     console.log("LOG: No. 1");
 
-    FoodInfluences();
+    if (PrimalFood[0] != NULL) {
+        FoodInfluences();
+    }
 
     function FoodInfluences() {
 
@@ -230,14 +237,8 @@ app.post('/move', (request, response) => {
                     }
             
                     for (let direction of FreeDirections) {
-                        if (RemainingArea <= 30) {
-                            if (i < RemainingArea) {
-                                getAllFreeFields(getNeighbourField(field, direction));
-                            }
-                        } else {
-                            if (i < Math.max(RemainingArea / 2, MyLength)) {
-                                getAllFreeFields(getNeighbourField(field, direction));
-                            }
+                        if (i < RemainingArea) {
+                            getAllFreeFields(getNeighbourField(field, direction));
                         }
                     }
                 }
