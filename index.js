@@ -20,8 +20,6 @@ app.use(logger('dev'))
 app.use(bodyParser.json())
 app.use(poweredByHandler)
 
-// --- SNAKE LOGIC GOES BELOW THIS LINE ---
-
 // Handle POST request to '/start'
 app.post('/start', (request, response) => {
   // NOTE: Do something here to start the game
@@ -39,22 +37,15 @@ app.post('/start', (request, response) => {
 // Handle POST request to '/move'
 app.post('/move', (request, response) => {
 
-    //standard move
-    let nextMove = 'left';
+    let move = 'left';
 
     let data = request.body;
     let directions = ['left', 'right', 'up', 'down'];
     let offsets = [[-1, 0],[1, 0],[0, -1],[0, 1]];
     let chances = [100, 100, 100, 100];
 
-    let PrimalFood = data.board.food[0];
-
-    // let NextMovement = {left: {move: 'left', offset: [-1, 0], chance: 100}, right: {move: 'right', offset: [1, 0], chance: 100}, up: {move: 'up', offset: [0, -1], chance: 100}, down: {move: 'down', offset: [0, 1], chance: 100}};
-
     let MySnakesHead = data.you.body[0];
     let MyLength = data.you.body.length;
-
-    let TestedOffsets = [[0, 0]];
 
     console.log(data.turn);
 
@@ -109,218 +100,36 @@ app.post('/move', (request, response) => {
         }
     }
 
-    for (e of GameBoard) {
-        console.log(e);
-    }
+    let BoardArea = 0;
+    let RemainingArea = 0;
 
-    /*
-     * get nearest piece of food as PrimalFood
-    */
+    calculateRemainingArea();
 
-    let MinimumDistancedFood = Infinity;
-    for (let food of data.board.food) {
-        let distance = Math.abs(food.x - MySnakesHead.x) + Math.abs(food.y - MySnakesHead.y);
-        if (distance < MinimumDistancedFood) {
-            MinimumDistancedFood = distance;
-            PrimalFood = food;
+    function calculateRemainingArea () {
+        BoardArea = data.board.height * data.board.width;
+        RemainingArea = BoardArea;
+        for (let snake of data.board.snakes) {
+            RemainingArea -= snake.body.length
         }
+     
     }
 
-    /*
-     * calculate remaining space as RemainingArea
-    */
+    let PrimalFood = data.board.food[0];
+    getNearestPieceOfFoodAsPrimalFood();
 
-    let BoardArea = data.board.height * data.board.width;
-    let RemainingArea = BoardArea;
-    for (let snake of data.board.snakes) {
-        RemainingArea -= snake.body.length
-    }
+    function getNearestPieceOfFoodAsPrimalFood () {
 
-    /*
-     * test offsets if possible to play
-    */
+        let MinimumDistancedFood = Infinity;
 
-    for (let o = 0; o < 4; o++) {
-        console.log(ObstacleOnPosition(offsets[o]));
-        if (ObstacleOnPosition(offsets[o])) {
-            chances[o] = 0;
-        }
-    }
-
-    /*
-     * get snakes and its lengths and configure chances on next movement if distance == 2
-    */
-
-    let snakes = [];
-    for (snake of data.board.snakes) {
-
-        /*
-         * TODO:
-         * edit chance changes
-         * code design
-        */
-
-        let DistanceToMySnakeHead = Math.abs(snake.x - MySnakesHead.x) + Math.abs(snake.y - MySnakesHead.y);
-        let SnakeLength = snake.body.length;
-        snakes.push({x: snake.x, y: snake.y, distance: DistanceToMySnakeHead, length: SnakeLength});
-
-        // configure chances on next movement
-        let ChanceChange = SnakeLength >= MyLength ? -75 : 25;
-
-        if (DistanceToMySnakeHead == 2) {
-            let OffsetToMySnakesHead = {x: snake.x - MySnakesHead.x, y: snake.y - MySnakesHead.y};
-            if (OffsetToMySnakesHead.x < 0 && chances[0] > 0) {
-                chances[0] += ChanceChange;
-            } else if (OffsetToMySnakesHead.x > 0 && chances[1] > 0) {
-                chances[1] += ChanceChange;
-            }
-            if (OffsetToMySnakesHead.y < 0 && chances[2] > 0) {
-                chances[2] += ChanceChange;
-            } else if (OffsetToMySnakesHead.y > 0 && chances[3] > 0) {
-                chances[3] += ChanceChange;
-            }
-        } 
-    }
-
-    /* 
-     * influence of bordering fields
-    */
-
-    NextMoveInfluences();
-
-    function NextMoveInfluences() {
-
-        /*
-         * TODO:
-         * edit TunnelHasExit() function
-         * change chances increasement
-        */
-
-        for (let i = 0; i < 4; i++) {
-            difference = 0;
-            for (let offset of offsets) {
-                if (ObstacleOnPosition([offsets[i][0] + offset[0], offsets[i][1] + offset[1]]) && chances[i] > 0) {
-                    difference += 10;
-                }
-            }
-            if (difference >= 30 && chances[i] > 0) {
-                TestedOffsets = [[0, 0]];
-                if (TunnelHasExit(offsets[i])) {
-                    chances[i] = 40;
-                } else {
-                    chances[i] = 35;
-                }
-            } else {
-                chances[i] -= difference;
+        for (let food of data.board.food) {
+            let distance = Math.abs(food.x - MySnakesHead.x) + Math.abs(food.y - MySnakesHead.y);
+            if (distance < MinimumDistancedFood) {
+                MinimumDistancedFood = distance;
+                PrimalFood = food;
             }
         }
-      
-        for (let i = 0; i < 4; i++) {
-            for (snake of data.board.snakes) {
-                position = [MySnakesHead.x + offsets[i][0], MySnakesHead.y + offsets[i][1]];
-                //test for next move head of other snake
-                for (let offset of offsets) {
-                    if (snake.body[0].x == position[0] + offset[0] && snake.body[0].y == position[1] + offset[1] && snake.id != data.you.id && chances[i] > 0) {
-                        if (snake.body.length >= MyLength) {
-                            chances[i] -= 30;
-                        } else {
-                            chances[i] += 30;
-                        }
-                    }
-                }
-            }
-        }
+
     }
-    
-    /*
-     * Test for close room < 10 on neighbour fields
-    */
-
-    class field {
-        constructor(x, y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
-    let f;
-
-    for (let d = 0; d < 4; d++) {
-        let StartField = MySnakesHead;
-
-        let TestField = getNeighbourField(StartField, d);
-        let FreeFields = new Array();
-        let i = 0;
-        getAllFreeFields(TestField);
-
-        console.log(FreeFields.length);
-
-        if (i >= 10) {
-            //increased chance for direction
-        } else {    
-            //decrease chance for direction proportional to FreeFields.length
-            if (i == 0) {
-                chances[d] == 0;
-            } else {
-                chances[d] -= parseInt(Math.pow(FreeFields.length, -1) * 80);
-            }
-            
-            //test if there will be a exit in x moves
-            //change chance for direction proportinal to chance for exit
-        }
-
-        function getAllFreeFields(field) {
-
-            /*
-             * TODO:
-             * doubles
-            */
-    
-            let FreeDirections = [];
-
-            if (!ObstacleOnPosition([field.x, field.y])) {
-                for (let direction = 0; direction < 4; direction++) {
-    
-                    let TestThisField = getNeighbourField(field, direction);
-                    if (!ObstacleOnPosition([TestThisField.x, TestThisField.y])) {
-                        if (!FieldInArray(TestThisField, FreeFields)) {
-                            i++;
-                            FreeFields.push(TestThisField.x);
-                            FreeFields.push(TestThisField.y);
-                            FreeDirections.push(direction);
-                        }
-                    }
-                }
-        
-                for (let direction of FreeDirections) {
-                    if (i <= 10) {
-                        getAllFreeFields(getNeighbourField(field, direction));
-                    }
-                }
-            }
-    
-        }
-    }
-
-    function FieldInArray(e, arr) {
-        let FLAG = false;
-        for (let i = 0; i < arr.length; i += 2) {
-            if (arr[i] == e.x && arr[i + 1] == e.y) {
-                FLAG = true;
-            }
-        }
-        return FLAG;
-    }
-
-    function getNeighbourField(StartField, direction) {
-        // direction : {left: 0, right: 1, up: 2, down: 3}
-        let NeighbourField = {x: offsets[direction][0] + StartField.x, y: offsets[direction][1] + StartField.y};
-        return NeighbourField;
-    }
-
-    /*
-     * influence of food
-    */
 
     FoodInfluences();
 
@@ -350,124 +159,240 @@ app.post('/move', (request, response) => {
         }
     }
 
-    /*
-     * return move
-    */
+    let FreeFieldInDirections = [0, 0, 0, 0];
+    countFreeFieldsInDirections();
 
-    let max = -Infinity;
-    for (let i = 0; i < 4; i++) {
-        if (chances[i] > max) {
-            max = chances[i];
-            nextMove = directions[i];
+    function countFreeFieldsInDirections () {
+        for (let d = 0; d < 4; d++) {
+
+            let TestField = getNeighbourField(MySnakesHead, d);
+    
+            function getNeighbourField(StartField, direction) {
+                // direction : {left: 0, right: 1, up: 2, down: 3}
+                let NeighbourField = {x: offsets[direction][0] + StartField.x, y: offsets[direction][1] + StartField.y};
+                return NeighbourField;
+            }
+    
+            let FreeFields = [];
+    
+            let i = 0;
+            getAllFreeFields(TestField);
+    
+            FreeFieldInDirections[d] = i;
+                
+            //test if there will be a exit in x moves
+            //change chance for direction proportinal to chance for exit
+    
+            function getAllFreeFields(field) {
+        
+                let FreeDirections = [];
+    
+                if (!ObstacleOnTile(field)) {
+    
+                    if (!FieldInArray(field, FreeFields)) {
+                        i++;
+                        FreeFields.push(field.x);
+                        FreeFields.push(field.y);
+                    }
+    
+                    for (let direction = 0; direction < 4; direction++) {
+        
+                        let TestThisField = getNeighbourField(field, direction);
+                        if (!ObstacleOnTile(TestThisField)) {
+                            if (!FieldInArray(TestThisField, FreeFields)) {
+                                i++;
+                                FreeFields.push(TestThisField.x);
+                                FreeFields.push(TestThisField.y);
+                                FreeDirections.push(direction);
+                            }
+                        }
+                    }
+            
+                    for (let direction of FreeDirections) {
+                        if (i < RemainingArea) {
+                            getAllFreeFields(getNeighbourField(field, direction));
+                        }
+                    }
+                }
+        
+            }
+        }
+
+        function FieldInArray(element, array) {
+
+            let FLAG = false;
+    
+            for (let i = 0; i < array.length; i += 2) {
+                if (array[i] == element.x && array[i + 1] == element.y) {
+                    FLAG = true;
+                }
+            }
+    
+            return FLAG;
+    
         }
     }
 
+    /* TODO: Auswertung FreeFieldsInDirection */
+    let MaxFreeFields = Math.max(...FreeFieldInDirections);
+    let MinFreeFields = Math.min(...FreeFieldInDirections);
+
+    let AvgFreeFields = 0;
+    for (let element of FreeFieldInDirections) {
+        AvgFreeFields += element / FreeFieldInDirections.length;
+    }
+
+    if (!(MaxFreeFields == MinFreeFields)) {
+        for (let d = 0; d < 4; d++) {
+            chances[d] -= 100 * (AvgFreeFields - FreeFieldInDirections[d]) / AvgFreeFields;
+        }
+    }
+
+    testForComingSnake();
+
+    function testForComingSnake () {
+
+        for (snake of data.board.snakes) {
+    
+            let DistanceToMySnakeHead = Math.abs(snake.x - MySnakesHead.x) + Math.abs(snake.y - MySnakesHead.y);
+            let SnakeLength = snake.body.length;
+    
+            let changeAmountChance = SnakeLength >= MyLength ? -30 : 30;
+    
+            if (DistanceToMySnakeHead == 2) {
+
+                let OffsetToMySnakesHead = {x: Math.sign(snake.x - MySnakesHead.x), y: Math.sign(snake.y - MySnakesHead.y)};
+
+                if (OffsetToMySnakesHead.x == -1) {
+                    chances[0] += changeAmountChance;
+                } else if (OffsetToMySnakesHead.x == 1) {
+                    chances[1] += changeAmountChance;
+                }
+
+                if (OffsetToMySnakesHead.y == -1) {
+                    chances[2] += changeAmountChance;
+                } else if (OffsetToMySnakesHead.y == 1) {
+                    chances[3] += changeAmountChance;
+                }
+
+            } 
+        }
+
+    }
+
+    let borderingFields = [0, 0, 0, 0]
+    chancingToBorderingFields()
+
+    function chancingToBorderingFields () {
+        for (let i = 0; i < 4; i++) {
+            borderingField = 0;
+            for (let offset of offsets) {
+                if (ObstacleOnPosition([offsets[i][0] + offset[0], offsets[i][1] + offset[1]]) && chances[i] > 0) {
+                    borderingField += 1;
+                }
+            }
+            
+            borderingFields[i] = borderingField;
+        }
+    }
+
+    if (chances[0] == chances[1]) {
+        if (borderingFields[0] > borderingFields[1]) {
+            chances[0]--;
+        } else if (borderingFields[0] < borderingFields[1]) {
+            chances[0]++;
+        }
+    }
+    if (chances[0] == chances[2]) {
+        if (borderingFields[0] > borderingFields[2]) {
+            chances[0]--;
+        } else if (borderingFields[0] < borderingFields[2]) {
+            chances[0]++;
+        }
+    }
+    if (chances[0] == chances[3]) {
+        if (borderingFields[0] > borderingFields[3]) {
+            chances[0]--;
+        } else if (borderingFields[0] < borderingFields[3]) {
+            chances[0]++;
+        }
+    }
+    if (chances[1] == chances[2]) {
+        if (borderingFields[1] > borderingFields[2]) {
+            chances[1]--;
+        } else if (borderingFields[1] < borderingFields[2]) {
+            chances[1]++;
+        }
+    }
+    if (chances[1] == chances[3]) {
+        if (borderingFields[1] > borderingFields[3]) {
+            chances[1]--;
+        } else if (borderingFields[1] < borderingFields[3]) {
+            chances[1]++;
+        }
+    }
+    if (chances[2] == chances[3]) {
+        if (borderingFields[2] > borderingFields[3]) {
+            chances[2]--;
+        } else if (borderingFields[2] < borderingFields[3]) {
+            chances[2]++;
+        }
+    }
+    
     for (let o = 0; o < 4; o++) {
         if (ObstacleOnPosition(offsets[o])) {
             chances[o] = 0;
         }
     }
 
-    /*
-     * logs
-    */
-
-    for (let i = 0; i < 4; i++) {
-        console.log(chances[i]);
-    }
-
-    /*
-     * Response data
-    */
-    
-    const ResponseData = {
-        move: nextMove, // one of: ['up','down','left','right']
-    }
-
-    return response.json(ResponseData);
-
-    //teste von StartOffset alle Nachbarfelder ob frei
-    //ignoriere bereits getestete Felder
-
-    function TunnelHasExit (StartOffset) {
-        return true;
-        /*
-        let FreeOffset;
-        let CountFreeOffsets = 0;
-        for (offset of offsets) {
-            let OffOffset = [StartOffset[0] + offset[0], StartOffset[1] + offset[1]];
-            if (!ElementInArray(OffOffset, TestedOffsets)) {
-                TestedOffsets[TestedOffsets.length] = OffOffset;
-                if (!ObstacleOnPosition(OffOffset)) {
-                    CountFreeOffsets += 1;
-                    FreeOffset = OffOffset;
-                }
-            }
-        }
-        if (CountFreeOffsets == 1) {
-            return TunnelHasExit(FreeOffset);
-        } else if (CountFreeOffsets == 0) {
-            return false;
-        } else {
-            return true;
-        }*/
-    }
-
-    function ElementInArray(elem, arr) {
-        let FLAG = false;
-        for (element of arr) {
-            if (element == elem) {
-                FLAG = true;
-            }
-        }
-        return FLAG;
-    }
-
     function ObstacleOnPosition (offset) {
 
-        let FLAG = false;
         let position = {x: 0, y: 0};
 
         position.x = MySnakesHead.x + offset[0];
         position.y = MySnakesHead.y + offset[1];
 
+        return ObstacleOnTile(position);
+        
+    }
+
+    function ObstacleOnTile (tile) {
+
+        let FLAG = false;
+
         //test for border
-        if (position.x < 0 || position.x > data.board.width - 1) {
+        if (tile.x < 0 || tile.x > data.board.width - 1) {
             FLAG = true;
         }
-        if (position.y < 0 || position.y > data.board.height - 1) {
+        if (tile.y < 0 || tile.y > data.board.height - 1) {
             FLAG = true;
         }
 
         //test for snake
         if (FLAG == false) {
-            if (GameBoard[position.y][position.x] >= 2) {
+            if (GameBoard[tile.y][tile.x] > 2) {
                 FLAG = true
             }
         }
 
         return FLAG;
-        
+
     }
 
-    function GetSnakeAndPositionToTile (tile) {
-
-        for (let i = 0; i < data.you.body.length; i++) {
-            let body = data.you.body[i];
-            if (body.x == tile[0] && body.y == tile[1]) {
-                return [you, i];
-            }
+    max = -Infinity;
+    for (let i = 0; i < 4; i++) {
+        if (chances[i] > max) {
+            max = chances[i];
+            move = directions[i];
         }
-        for (snake of data.board.snakes) {
-            for (let i = 0; i < snake.body.length; i++) {
-                let body = snake.body[i];
-                if (body.x == tile[0] && body.y == tile[1]) {
-                    return [snake, i];
-                }
-            }
-        }
-        return [NULL, NULL];
     }
+
+    const ResponseData = {
+        move: move, // one of: ['up','down','left','right']
+    }
+
+    return response.json(ResponseData);
+
 })
 
 app.post('/end', (request, response) => {
